@@ -110,4 +110,13 @@ public final class PlaybackParameters {
     return result;
   }
 
+  public interface Listener {
+    default void onCurrentPositionChanged(long currentPosition) {}
+  }
+
+  public Listener listener;
+
+  public void setListener(Listener l) {
+    listener = l;
+  }
 }

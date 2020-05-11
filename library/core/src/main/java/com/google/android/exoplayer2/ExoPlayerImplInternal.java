@@ -123,6 +123,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
   private long rendererPositionUs;
   private int nextPendingMessageIndex;
 
+  private long seekBaseMs;
+
   public ExoPlayerImplInternal(
       Renderer[] renderers,
       TrackSelector trackSelector,
@@ -192,6 +194,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
   }
 
   public void seekTo(Timeline timeline, int windowIndex, long positionUs) {
+    seekBaseMs = SystemClock.uptimeMillis();
     handler.obtainMessage(MSG_SEEK_TO, new SeekPosition(timeline, windowIndex, positionUs))
         .sendToTarget();
   }
@@ -453,7 +456,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
       updatePlaybackPositions();
     } else {
       if (playbackInfo.playbackState == Player.STATE_READY) {
-        startRenderers();
+        startRenderers(true);
         handler.sendEmptyMessage(MSG_DO_SOME_WORK);
       } else if (playbackInfo.playbackState == Player.STATE_BUFFERING) {
         handler.sendEmptyMessage(MSG_DO_SOME_WORK);
@@ -498,9 +501,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
     }
   }
 
-  private void startRenderers() throws ExoPlaybackException {
+  private void startRenderers(boolean b) throws ExoPlaybackException {
     rebuffering = false;
-    mediaClock.start();
+    mediaClock.start(b);
     for (Renderer renderer : enabledRenderers) {
       renderer.start();
     }
@@ -600,7 +603,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
         && shouldTransitionToReadyState(renderersReadyOrEnded)) {
       setState(Player.STATE_READY);
       if (playWhenReady) {
-        startRenderers();
+        startRenderers(false);
       }
     } else if (playbackInfo.playbackState == Player.STATE_READY
         && !(enabledRenderers.length == 0 ? isTimelineReady() : renderersReadyOrEnded)) {
@@ -752,6 +755,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
         periodPositionUs = newPlayingPeriodHolder.mediaPeriod.seekToUs(periodPositionUs);
         newPlayingPeriodHolder.mediaPeriod.discardBuffer(
             periodPositionUs - backBufferDurationUs, retainBackBufferFromKeyframe);
+      }
+      if (seekBaseMs > 0) {
+        periodPositionUs += (SystemClock.uptimeMillis() - seekBaseMs) * 1000;
+        seekBaseMs = 0;
       }
       resetRendererPosition(periodPositionUs);
       maybeContinueLoading();

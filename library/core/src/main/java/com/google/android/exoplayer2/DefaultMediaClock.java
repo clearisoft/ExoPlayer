@@ -62,8 +62,8 @@ import com.google.android.exoplayer2.util.StandaloneMediaClock;
   /**
    * Starts the standalone fallback clock.
    */
-  public void start() {
-    standaloneMediaClock.start();
+  public void start(boolean b) {
+    standaloneMediaClock.start(b);
   }
 
   /**
@@ -171,8 +171,9 @@ import com.google.android.exoplayer2.util.StandaloneMediaClock;
     // stream to reenter the ready state. The latter case uses the standalone clock to avoid getting
     // stuck if tracks in the current period have uneven durations.
     // See: https://github.com/google/ExoPlayer/issues/1874.
-    return rendererClockSource != null && !rendererClockSource.isEnded()
-        && (rendererClockSource.isReady() || !rendererClockSource.hasReadStreamToEnd());
+    return false;
+//    return rendererClockSource != null && !rendererClockSource.isEnded()
+//        && (rendererClockSource.isReady() || !rendererClockSource.hasReadStreamToEnd());
   }
 
 }

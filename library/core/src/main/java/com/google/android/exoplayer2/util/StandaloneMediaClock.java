@@ -44,9 +44,11 @@ public final class StandaloneMediaClock implements MediaClock {
   /**
    * Starts the clock. Does nothing if the clock is already started.
    */
-  public void start() {
+  public void start(boolean b) {
     if (!started) {
-      baseElapsedMs = clock.elapsedRealtime();
+      if (b || 0 == baseUs) {
+        baseElapsedMs = clock.elapsedRealtime();
+      }
       started = true;
     }
   }
@@ -84,6 +86,11 @@ public final class StandaloneMediaClock implements MediaClock {
         positionUs += playbackParameters.getMediaTimeUsForPlayoutTimeMs(elapsedSinceBaseMs);
       }
     }
+
+    if (null != playbackParameters.listener) {
+      playbackParameters.listener.onCurrentPositionChanged(positionUs / 1000);
+    }
+
     return positionUs;
   }
 

@@ -343,7 +343,7 @@ public class PlayerView extends FrameLayout implements AdsLoader.AdViewProvider 
     int playerLayoutId = R.layout.exo_player_view;
     boolean useArtwork = true;
     int defaultArtworkId = 0;
-    boolean useController = true;
+    boolean useController = false;
     int surfaceType = SURFACE_TYPE_SURFACE_VIEW;
     int resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT;
     int controllerShowTimeoutMs = PlayerControlView.DEFAULT_SHOW_TIMEOUT_MS;
